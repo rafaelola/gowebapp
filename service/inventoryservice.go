@@ -1,13 +1,11 @@
 package service
 
 import (
-	"database/sql"
+	"GoWebApp/database"
 	"encoding/json"
 	"fmt"
 	"log"
 )
-
-var db *sql.DB
 
 type Inventory struct {
 	Id            int    `json:"id"`
@@ -21,6 +19,7 @@ type Inventory struct {
 
 func GetInventory() []byte {
 	// connect to db
+	db := database.Connect()
 	// query the db
 	var inventories []Inventory
 	results, err := db.Query("SELECT id, productName,productCode,gtin,gs1DataMatrix,supplierName,categoryName FROM inventoryMaster")

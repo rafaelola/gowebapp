@@ -26,7 +26,7 @@ func Connect() *sql.DB {
 	databaseName := os.Getenv("DB_NAME")
 	port := os.Getenv("DB_PORT")
 	connectionDetails := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, databaseName)
-	database, err := sql.Open("mysql", connectionDetails)
+	db, err := sql.Open("mysql", connectionDetails)
 	if err != nil {
 		log.Println("Could not connect!")
 		panic(err)
@@ -34,9 +34,10 @@ func Connect() *sql.DB {
 
 	log.Println("Connected.")
 	// See "Important settings" section.
-	database.SetConnMaxLifetime(time.Minute * 3)
-	database.SetMaxOpenConns(10)
-	database.SetMaxIdleConns(10)
-	return database
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+	database = db
+	return db
 
 }
