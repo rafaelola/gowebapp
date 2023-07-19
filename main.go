@@ -2,7 +2,7 @@ package main
 
 import (
 	"GoWebApp/database"
-	"GoWebApp/service"
+	"GoWebApp/models"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"net"
@@ -13,16 +13,21 @@ import (
 func main() {
 
 	// connect to the database
-	database.Connect()
+	db := database.Connect()
 	log.Println("DB Connected in main.")
-	jsonInventories := service.GetInventory()
-	http.HandleFunc("/greeting", func(w http.ResponseWriter,
+	//jsonInventories := service.GetInventory(db)
+
+	http.HandleFunc("/inventories", func(w http.ResponseWriter,
 		r *http.Request) {
-		// connect to db
-		//connect()
-		unformattedJson := string(jsonInventories)
+		inventories, err := models.All(db)
+		if err != nil {
+			log.Print(err)
+			http.Error(w, http.StatusText(500), 500)
+			return
+		}
+		//unformattedJson := string(jsonInventories)
 		t, _ := template.New("foo").Parse(`{{define "T"}}Hello, {{.}}!{{end}}`)
-		_ = t.ExecuteTemplate(w, "T", unformattedJson)
+		_ = t.ExecuteTemplate(w, "T", inventories)
 		log.Println("Result html")
 
 		log.Println("After logging inventories")
