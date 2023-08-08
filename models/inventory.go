@@ -50,5 +50,21 @@ func One(db *sql.DB, id int) (*Inventory, error) {
 	if err != nil {
 		return nil, err
 	}
+	// if no matching results found, return nil
+	if inventory.Id == 0 {
+		return nil, nil
+	}
 	return &inventory, nil
+}
+
+func Create(db *sql.DB, inventory *Inventory) error {
+	result, err := db.Exec("INSERT INTO inventoryMaster(productName,productCode,gtin,gs1DataMatrix,supplierName,categoryName) VALUES(?,?,?,?,?,?)", inventory.ProductName,
+		inventory.ProductCode, inventory.Gtin, inventory.Gs1DataMatrix, inventory.SupplierName, inventory.CategoryName)
+	if err != nil {
+		return err
+	}
+	id, _ := result.LastInsertId()
+	// return last inserted id as int
+	inventory.Id = int(id)
+	return nil
 }
