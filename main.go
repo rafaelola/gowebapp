@@ -5,6 +5,7 @@ import (
 	"GoWebApp/models"
 	"GoWebApp/utils"
 	"encoding/json"
+	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"log"
@@ -13,11 +14,16 @@ import (
 	"strconv"
 )
 
+var validate *validator.Validate
+
 func main() {
 	r := mux.NewRouter()
 
 	// connect to the database
 	db := database.Connect()
+
+	// Initialize the validator
+	validate = validator.New()
 
 	log.Println("DB Connected in main.")
 	//path prefix
@@ -63,15 +69,34 @@ func main() {
 
 	apirouter.HandleFunc("/inventories/create/", func(w http.ResponseWriter,
 		r *http.Request) {
-		// get request body and json decode it
-		decoder := json.NewDecoder(r.Body)
+		// create a new instance of inventory
 		var inventory models.InventoryModel
+
+		// Decode the JSON request body into the inventory instance
+		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&inventory)
 		if err != nil {
 			log.Print(err)
 			utils.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
 			return
 		}
+		// Validate the inventory instance
+		err = validate.Struct(inventory)
+
+		if err != nil {
+			var errors []*models.IError
+			for _, err := range err.(validator.ValidationErrors) {
+				var el models.IError
+				el.Field = err.Field()
+				el.Tag = err.Tag()
+				el.Value = err.Param()
+				errors = append(errors, &el)
+			}
+			log.Print(err)
+			utils.RespondWithJson(w, http.StatusUnprocessableEntity, errors)
+			return
+		}
+		// Create the inventory record
 		err = models.Create(db, (*models.Inventory)(&inventory))
 		if err != nil {
 			log.Print(err)
