@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-var database *sql.DB
-
 func init() {
 	err := godotenv.Load(".env")
 
@@ -37,7 +35,6 @@ func Connect() *sql.DB {
 	db.SetConnMaxLifetime(time.Minute * 3)
 	db.SetMaxOpenConns(10)
 	db.SetMaxIdleConns(10)
-	database = db
 	return db
 
 }
