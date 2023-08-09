@@ -21,7 +21,7 @@ type InventoryModel struct {
 type IError struct {
 	Field string
 	Tag   string
-	Value string
+	Param string
 }
 
 func (i *InventoryModel) Validate() error {
@@ -31,9 +31,9 @@ func (i *InventoryModel) Validate() error {
 		var errors []*IError
 		for _, err := range errs.(validator.ValidationErrors) {
 			errors = append(errors, &IError{
-				Field: err.Field(),
-				Tag:   err.Tag(),
-				Value: err.Param(),
+				Field: err.StructField(),
+				Tag:   err.ActualTag(),
+				Param: err.Param(),
 			})
 		}
 		result, _ := json.Marshal(errors)
