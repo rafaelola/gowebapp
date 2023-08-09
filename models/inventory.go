@@ -68,3 +68,13 @@ func Create(db *sql.DB, inventory *Inventory) error {
 	inventory.Id = int(id)
 	return nil
 }
+
+func Update(db *sql.DB, id int, inventory *Inventory) error {
+	_, err := db.Exec("UPDATE inventoryMaster SET productName=?,productCode=?,gtin=?,gs1DataMatrix=?,supplierName=?,categoryName=? WHERE id=?", inventory.ProductName,
+		inventory.ProductCode, inventory.Gtin, inventory.Gs1DataMatrix, inventory.SupplierName, inventory.CategoryName, id)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}

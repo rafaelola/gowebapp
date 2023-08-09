@@ -81,19 +81,11 @@ func main() {
 			return
 		}
 		// Validate the inventory instance
-		err = validate.Struct(inventory)
+		err = inventory.Validate()
 
 		if err != nil {
-			var errors []*models.IError
-			for _, err := range err.(validator.ValidationErrors) {
-				var el models.IError
-				el.Field = err.Field()
-				el.Tag = err.Tag()
-				el.Value = err.Param()
-				errors = append(errors, &el)
-			}
 			log.Print(err)
-			utils.RespondWithJson(w, http.StatusUnprocessableEntity, errors)
+			utils.RespondWithError(w, http.StatusUnprocessableEntity, err.Error())
 			return
 		}
 		// Create the inventory record
@@ -106,7 +98,6 @@ func main() {
 		// return the new inventory ID with 201 Created
 		utils.RespondWithJson(w, http.StatusCreated, inventory.Id)
 		log.Println("Result inventories/add/")
-
 	}).Methods("POST")
 
 	apirouter.HandleFunc("/inventories/update/{id:[0-9]+}", func(w http.ResponseWriter,
@@ -153,5 +144,5 @@ func main() {
 	if err != nil {
 		return // return from main
 	}
-	defer db.Close()
+	//defer db.Close()
 }
